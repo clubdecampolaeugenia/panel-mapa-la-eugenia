@@ -60,8 +60,13 @@
   .fila .lote { font-weight: 900; color: var(--petroleo); font-size: 15px; }
   .fila .info { display: flex; flex-direction: column; gap: 2px; }
   .fila .nombre { font-size: 12px; color: var(--petroleo); opacity: 0.75; font-weight: 400; }
-  .fila .acciones { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-  .fila .acciones .badge { margin-left: 0; }
+  .fila .acciones { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+  .fila .acciones .badge { margin-left: 0; text-align: center; padding: 6px 14px; font-size: 12px; box-sizing: border-box; }
+  .fila .acciones .btn-mini { text-align: center; box-sizing: border-box; }
+
+  .fila.oculto-item { background: var(--petroleo); }
+  .fila.oculto-item .lote { color: var(--hueso); }
+  .fila.oculto-item .nombre { color: var(--hueso); opacity: 0.8; }
 
   .badge { display: inline-block; font-size: 11px; font-weight: 900; text-transform: uppercase; border-radius: 20px; padding: 4px 10px; background: var(--lima); color: var(--petroleo); border: 2px solid var(--petroleo); margin-left: 8px; }
 
@@ -158,7 +163,7 @@
       cont.innerHTML = '';
       res.data.forEach(function(item) {
         var fila = document.createElement('div');
-        fila.className = 'fila';
+        fila.className = 'fila oculto-item';
         var nombreHtml = item.nombre ? '<span class="nombre">' + item.nombre + '</span>' : '';
         fila.innerHTML = '<span class="info"><span class="lote">' + item.lote + '</span>' + nombreHtml + '</span>' +
           '<span class="acciones"><span class="badge">oculto</span><button class="btn-mini mostrar" onclick="mostrarLote(\'' + item.lote + '\')">Volver a mostrar</button></span>';
