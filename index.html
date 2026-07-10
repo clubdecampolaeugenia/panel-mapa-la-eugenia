@@ -58,8 +58,10 @@
 
   .fila { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--blanco); border-radius: 14px; padding: 10px 14px; margin-bottom: 8px; }
   .fila .lote { font-weight: 900; color: var(--petroleo); font-size: 15px; }
+  .fila .info { display: flex; flex-direction: column; gap: 2px; }
+  .fila .nombre { font-size: 12px; color: var(--petroleo); opacity: 0.75; font-weight: 400; }
 
-  .badge { display: inline-block; font-size: 11px; font-weight: 900; text-transform: uppercase; border-radius: 20px; padding: 4px 10px; background: var(--naranja); color: var(--petroleo); border: 2px solid var(--petroleo); margin-left: 8px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 900; text-transform: uppercase; border-radius: 20px; padding: 4px 10px; background: var(--lima); color: var(--petroleo); border: 2px solid var(--petroleo); margin-left: 8px; }
 
   .btn-mini { border: 2px solid var(--petroleo); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 900; text-transform: uppercase; font-family: 'Roboto', sans-serif; cursor: pointer; transition: transform 0.08s, opacity 0.15s; white-space: nowrap; }
   .btn-mini:active { transform: scale(0.95); }
@@ -155,7 +157,8 @@
       res.data.forEach(function(item) {
         var fila = document.createElement('div');
         fila.className = 'fila';
-        fila.innerHTML = '<span class="lote">' + item.lote + '<span class="badge">oculto</span></span>' +
+        var nombreHtml = item.nombre ? '<span class="nombre">' + item.nombre + '</span>' : '';
+        fila.innerHTML = '<span class="info"><span class="lote">' + item.lote + '<span class="badge">oculto</span></span>' + nombreHtml + '</span>' +
           '<button class="btn-mini mostrar" onclick="mostrarLote(\'' + item.lote + '\')">Volver a mostrar</button>';
         cont.appendChild(fila);
       });
@@ -182,7 +185,8 @@
           var boton = item.oculto
             ? '<button class="btn-mini mostrar" onclick="mostrarLote(\'' + item.lote + '\')">Volver a mostrar</button>'
             : '<button class="btn-mini ocultar" onclick="ocultarLote(\'' + item.lote + '\')">Ocultar</button>';
-          fila.innerHTML = '<span class="lote">' + item.lote + badge + '</span>' + boton;
+          var nombreHtml = item.nombre ? '<span class="nombre">' + item.nombre + '</span>' : '';
+          fila.innerHTML = '<span class="info"><span class="lote">' + item.lote + badge + '</span>' + nombreHtml + '</span>' + boton;
           cont.appendChild(fila);
         });
       });
