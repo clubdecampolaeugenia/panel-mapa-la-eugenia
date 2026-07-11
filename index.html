@@ -113,11 +113,13 @@
 <script>
   var EXEC_URL = 'https://script.google.com/macros/s/AKfycbw3HahM7g5kEJ67KGfmA-PFaFDCu_W0yiCyzkC50lIo_CzyoB9g0D5o_idHIbXYh8RciQ/exec';
   var PIN_GUARDADO = '';
+  var PINES_VALIDOS = ['1112', '1923'];
 
   function verificarPin() {
     var pin = document.getElementById('pinInput').value;
-    if (pin === '1112') {
+    if (PINES_VALIDOS.indexOf(pin) !== -1) {
       PIN_GUARDADO = pin;
+      localStorage.setItem('cgv_admin_ok', '1');
       document.getElementById('pinScreen').style.display = 'none';
       document.getElementById('mainScreen').style.display = 'block';
       document.getElementById('mainScreen').classList.add('active');
@@ -132,6 +134,19 @@
     }
   }
   document.getElementById('pinInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') verificarPin(); });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var params = new URLSearchParams(window.location.search);
+    var pinUrl = params.get('pin');
+    if (localStorage.getItem('cgv_admin_ok') === '1' || (pinUrl && PINES_VALIDOS.indexOf(pinUrl) !== -1)) {
+      PIN_GUARDADO = pinUrl || '1923';
+      localStorage.setItem('cgv_admin_ok', '1');
+      document.getElementById('pinScreen').style.display = 'none';
+      document.getElementById('mainScreen').style.display = 'block';
+      document.getElementById('mainScreen').classList.add('active');
+      cargarOcultos();
+    }
+  });
 
   function cerrarSesion() {
     document.getElementById('mainScreen').style.display = 'none';
