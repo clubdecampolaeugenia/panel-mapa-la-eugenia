@@ -113,47 +113,6 @@
 <script>
   var EXEC_URL = 'https://script.google.com/macros/s/AKfycbw3HahM7g5kEJ67KGfmA-PFaFDCu_W0yiCyzkC50lIo_CzyoB9g0D5o_idHIbXYh8RciQ/exec';
   var PIN_GUARDADO = '';
-  var PINES_VALIDOS = ['1112', '1923'];
-
-  function verificarPin() {
-    var pin = document.getElementById('pinInput').value;
-    if (PINES_VALIDOS.indexOf(pin) !== -1) {
-      PIN_GUARDADO = pin;
-      localStorage.setItem('cgv_admin_ok', '1');
-      document.getElementById('pinScreen').style.display = 'none';
-      document.getElementById('mainScreen').style.display = 'block';
-      document.getElementById('mainScreen').classList.add('active');
-      document.getElementById('pinError').innerText = '';
-      cargarOcultos();
-    } else {
-      document.getElementById('pinError').innerText = 'PIN incorrecto. Intentá de nuevo.';
-      document.getElementById('pinInput').value = '';
-      var pinEl = document.getElementById('pinInput');
-      pinEl.classList.add('error');
-      setTimeout(function(){ pinEl.classList.remove('error'); }, 400);
-    }
-  }
-  document.getElementById('pinInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') verificarPin(); });
-
-  document.addEventListener('DOMContentLoaded', function() {
-    var params = new URLSearchParams(window.location.search);
-    var pinUrl = params.get('pin');
-    if (localStorage.getItem('cgv_admin_ok') === '1' || (pinUrl && PINES_VALIDOS.indexOf(pinUrl) !== -1)) {
-      PIN_GUARDADO = pinUrl || '1923';
-      localStorage.setItem('cgv_admin_ok', '1');
-      document.getElementById('pinScreen').style.display = 'none';
-      document.getElementById('mainScreen').style.display = 'block';
-      document.getElementById('mainScreen').classList.add('active');
-      cargarOcultos();
-    }
-  });
-
-  function cerrarSesion() {
-    document.getElementById('mainScreen').style.display = 'none';
-    document.getElementById('mainScreen').classList.remove('active');
-    document.getElementById('pinScreen').style.display = 'block';
-    document.getElementById('pinInput').value = '';
-  }
 
   function jsonp(params, callback) {
     var cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*10000);
@@ -168,6 +127,54 @@
     var script = document.createElement('script');
     script.src = EXEC_URL + '?' + qs + '&callback=' + cbName;
     document.body.appendChild(script);
+  }
+
+  function mostrarPanelAdmin() {
+    document.getElementById('pinScreen').style.display = 'none';
+    document.getElementById('mainScreen').style.display = 'block';
+    document.getElementById('mainScreen').classList.add('active');
+    document.getElementById('pinError').innerText = '';
+    cargarOcultos();
+  }
+
+  function verificarPin() {
+    var intento = document.getElementById('pinInput').value;
+    jsonp({ action: 'validarPin', pin: intento }, function(res) {
+      if (res && res.ok) {
+        PIN_GUARDADO = intento;
+        localStorage.setItem('cgv_pin', intento);
+        mostrarPanelAdmin();
+      } else {
+        document.getElementById('pinError').innerText = 'PIN incorrecto. Intentá de nuevo.';
+        document.getElementById('pinInput').value = '';
+        var pinEl = document.getElementById('pinInput');
+        pinEl.classList.add('error');
+        setTimeout(function(){ pinEl.classList.remove('error'); }, 400);
+      }
+    });
+  }
+  document.getElementById('pinInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') verificarPin(); });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var savedPin = localStorage.getItem('cgv_pin');
+    if (!savedPin) return;
+    jsonp({ action: 'validarPin', pin: savedPin }, function(res) {
+      if (res && res.ok) {
+        PIN_GUARDADO = savedPin;
+        mostrarPanelAdmin();
+      } else {
+        localStorage.removeItem('cgv_pin');
+      }
+    });
+  });
+
+  function cerrarSesion() {
+    localStorage.removeItem('cgv_pin');
+    PIN_GUARDADO = '';
+    document.getElementById('mainScreen').style.display = 'none';
+    document.getElementById('mainScreen').classList.remove('active');
+    document.getElementById('pinScreen').style.display = 'block';
+    document.getElementById('pinInput').value = '';
   }
 
   function cargarOcultos() {
