@@ -75,6 +75,14 @@
   .btn-mini.ocultar { background: var(--petroleo); color: var(--naranja); }
   .btn-mini.mostrar { background: var(--petroleo); color: var(--naranja); }
 
+  .expo-row { display: flex; gap: 6px; margin-top: -2px; margin-bottom: 8px; }
+  .expo-input { flex: 1; border: 2px solid var(--petroleo); border-radius: 12px; padding: 7px 10px; font-family: 'Roboto', sans-serif; font-size: 12px; color: var(--petroleo); outline: none; background: var(--blanco); }
+  .expo-input:focus { border-color: var(--naranja); }
+  .expo-input.error { animation: shakeError 0.35s ease-in-out; border-color: var(--error); }
+  .btn-mini.expo-guardar { background: var(--naranja); color: var(--petroleo); border-color: var(--petroleo); flex-shrink: 0; }
+  .btn-mini.expo-quitar { background: var(--blanco); color: var(--error); border-color: var(--error); flex-shrink: 0; }
+  .nombre-expo { display: block; font-size: 11px; font-weight: 900; color: var(--petroleo); }
+
   .vacio { color: var(--petroleo); opacity: 0.65; font-size: 13px; text-align: center; padding: 10px 0; }
   .divider { border: none; border-top: 1.5px solid #9bb583; margin: 18px 0; }
 </style>
@@ -215,9 +223,21 @@
             ? '<button class="btn-mini mostrar" onclick="mostrarLote(\'' + item.lote + '\')">Volver a mostrar</button>'
             : '<button class="btn-mini ocultar" onclick="ocultarLote(\'' + item.lote + '\')">Ocultar</button>';
           var nombreHtml = item.nombre ? '<span class="nombre">' + item.nombre + '</span>' : '';
-          fila.innerHTML = '<span class="info"><span class="lote">' + item.lote + '</span>' + nombreHtml + '</span>' +
+          var expoHtml = item.nombreExposicion ? '<span class="nombre-expo">Exposición: ' + item.nombreExposicion + '</span>' : '';
+          fila.innerHTML = '<span class="info"><span class="lote">' + item.lote + '</span>' + nombreHtml + expoHtml + '</span>' +
             '<span class="acciones">' + badge + boton + '</span>';
           cont.appendChild(fila);
+
+          var expoRow = document.createElement('div');
+          expoRow.className = 'expo-row';
+          var quitarBtn = item.nombreExposicion
+            ? '<button class="btn-mini expo-quitar" onclick="quitarExposicionUI(\'' + item.lote + '\')">Quitar alias</button>'
+            : '';
+          expoRow.innerHTML =
+            '<input type="text" class="expo-input" id="expo-' + item.lote + '" placeholder="Nombre de exposición (ej: Rodrigo Montiel)" value="' + (item.nombreExposicion || '') + '">' +
+            '<button class="btn-mini expo-guardar" onclick="guardarExposicion(\'' + item.lote + '\')">Guardar</button>' +
+            quitarBtn;
+          cont.appendChild(expoRow);
         });
       });
     }, 300);
@@ -233,6 +253,21 @@
   function mostrarLote(lote) {
     jsonp({ action: 'mostrar', lote: lote, pin: PIN_GUARDADO }, function(res) {
       cargarOcultos();
+      buscarLote();
+    });
+  }
+
+  function guardarExposicion(lote) {
+    var input = document.getElementById('expo-' + lote);
+    var val = input.value.trim();
+    if (!val) { input.classList.add('error'); setTimeout(function(){ input.classList.remove('error'); }, 400); return; }
+    jsonp({ action: 'establecerExposicion', lote: lote, nombre: val, pin: PIN_GUARDADO }, function(res) {
+      buscarLote();
+    });
+  }
+
+  function quitarExposicionUI(lote) {
+    jsonp({ action: 'quitarExposicion', lote: lote, pin: PIN_GUARDADO }, function(res) {
       buscarLote();
     });
   }
