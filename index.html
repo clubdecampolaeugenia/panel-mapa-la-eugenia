@@ -108,6 +108,11 @@
     </div>
 
     <div class="seccion">
+      <span class="field-label">Con nombre de exposición</span>
+      <div id="listaExposiciones"><div class="vacio">Cargando…</div></div>
+    </div>
+
+    <div class="seccion">
       <span class="field-label">Buscar lote</span>
       <input type="text" class="buscador-input" id="buscarInput" placeholder="Ej: I06" oninput="buscarLote()">
       <div id="listaBusqueda"></div>
@@ -143,6 +148,7 @@
     document.getElementById('mainScreen').classList.add('active');
     document.getElementById('pinError').innerText = '';
     cargarOcultos();
+    cargarExposiciones();
   }
 
   function verificarPin() {
@@ -197,6 +203,23 @@
         var nombreHtml = item.nombre ? '<span class="nombre">' + item.nombre + '</span>' : '';
         fila.innerHTML = '<span class="info"><span class="lote">' + item.lote + '</span>' + nombreHtml + '</span>' +
           '<span class="acciones"><span class="badge">oculto</span><button class="btn-mini mostrar" onclick="mostrarLote(\'' + item.lote + '\')">Volver a mostrar</button></span>';
+        cont.appendChild(fila);
+      });
+    });
+  }
+
+  function cargarExposiciones() {
+    jsonp({ action: 'listarExposiciones' }, function(res) {
+      var cont = document.getElementById('listaExposiciones');
+      if (!res.ok) { cont.innerHTML = '<div class="vacio">Error al cargar</div>'; return; }
+      if (res.data.length === 0) { cont.innerHTML = '<div class="vacio">Ningún lote tiene nombre de exposición</div>'; return; }
+      cont.innerHTML = '';
+      res.data.forEach(function(item) {
+        var fila = document.createElement('div');
+        fila.className = 'fila oculto-item';
+        var nombreRealHtml = item.nombreFacturacion ? '<span class="nombre">real: ' + item.nombreFacturacion + '</span>' : '';
+        fila.innerHTML = '<span class="info"><span class="lote">' + item.lote + '</span><span class="nombre">' + item.nombreExposicion + '</span>' + nombreRealHtml + '</span>' +
+          '<span class="acciones"><button class="btn-mini mostrar" onclick="quitarExposicionUI(\'' + item.lote + '\')">Quitar alias</button></span>';
         cont.appendChild(fila);
       });
     });
@@ -263,12 +286,14 @@
     if (!val) { input.classList.add('error'); setTimeout(function(){ input.classList.remove('error'); }, 400); return; }
     jsonp({ action: 'establecerExposicion', lote: lote, nombre: val, pin: PIN_GUARDADO }, function(res) {
       buscarLote();
+      cargarExposiciones();
     });
   }
 
   function quitarExposicionUI(lote) {
     jsonp({ action: 'quitarExposicion', lote: lote, pin: PIN_GUARDADO }, function(res) {
       buscarLote();
+      cargarExposiciones();
     });
   }
 </script>
